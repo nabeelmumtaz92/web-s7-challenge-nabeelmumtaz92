@@ -17,6 +17,7 @@ const schema = Yup.object().shape({
     .required('Toppings are required'),
 });
 
+
 const toppingsOptions = [
   { topping_id: '1', text: 'Pepperoni' },
   { topping_id: '2', text: 'Green Peppers' },
@@ -31,14 +32,11 @@ export default function Form() {
     size: '',
     toppings: [],
   });
-  const [formErrors, setFormErrors] = useState({});
-
   function Form() {
     const [formData, setFormData] = useState({ fullName: '', size: '', toppings: [] });
     const [isFullNameValid, setIsFullNameValid] = useState(false);
     const [isSizeValid, setIsSizeValid] = useState(false);
-    const [isFormValid, setIsFormValid] = useState(false);
-    
+   1
     // Validate fullName
     useEffect(() => {
       const isValid = schema.fields.fullName.isValidSync(formData.fullName);
@@ -53,6 +51,8 @@ export default function Form() {
   
   const isFormValid = isFullNameValid && isSizeValid;
   
+  const [formErrors, setFormErrors] = useState({});
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
