@@ -33,10 +33,32 @@ export default function Form() {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  const isFormFilled = formData.fullName && formData.size && formData.toppings.length > 0;
+  function Form() {
+    const [formData, setFormData] = useState({ fullName: '', size: '', toppings: [] });
+    const [isFullNameValid, setIsFullNameValid] = useState(false);
+    const [isSizeValid, setIsSizeValid] = useState(false);
+    const [isFormValid, setIsFormValid] = useState(false);
+    
+    // Validate fullName
+    useEffect(() => {
+      const isValid = schema.fields.fullName.isValidSync(formData.fullName);
+      setIsFullNameValid(isValid);
+    }, [formData.fullName]);
+  
+    // Validate size
+    useEffect(() => {
+      const isValid = schema.fields.size.isValidSync(formData.size);
+      setIsSizeValid(isValid);
+    }, [formData.size]);
+  
+  const isFormValid = isFullNameValid && isSizeValid;
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
-    try {
+
+      try {
+     // Simulate delay (e.g., network request latency)
+     await new Promise((resolve) => setTimeout(resolve, 2000)); // 2000 ms delay
       // Validate form data against the schema
       await schema.validate(formData, { abortEarly: false });
       setFormErrors({});
@@ -120,4 +142,4 @@ export default function Form() {
       </div>
       <button type="submit" disabled = {!isFormFilled}>Submit</button>
     </form>
-  )}
+  )}}

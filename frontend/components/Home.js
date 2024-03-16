@@ -9,7 +9,7 @@ function Home() {
       {/* Wrap the img in a Link component */}
       <Link to="/order">
         <img
-          alt="Order pizza"
+          alt="order-pizza"
           style={{ cursor: 'pointer' }}
           src={pizza}
         />
