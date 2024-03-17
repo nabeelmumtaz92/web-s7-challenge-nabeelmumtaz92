@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Import Link
 import pizza from './images/pizza.jpg';
-import './App';
+import Form from './Form';
+
 function Home() {
   return (
     <div>

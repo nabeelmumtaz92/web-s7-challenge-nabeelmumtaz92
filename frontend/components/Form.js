@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as Yup from 'yup';
 import '../styles/styles.css'
 import '../styles/reset.css'
@@ -17,6 +17,7 @@ const schema = Yup.object().shape({
     .required('Toppings are required'),
 });
 
+
 const toppingsOptions = [
   { topping_id: '1', text: 'Pepperoni' },
   { topping_id: '2', text: 'Green Peppers' },
@@ -31,14 +32,10 @@ export default function Form() {
     size: '',
     toppings: [],
   });
-  const [formErrors, setFormErrors] = useState({});
 
-  function Form() {
-    const [formData, setFormData] = useState({ fullName: '', size: '', toppings: [] });
     const [isFullNameValid, setIsFullNameValid] = useState(false);
     const [isSizeValid, setIsSizeValid] = useState(false);
-    const [isFormValid, setIsFormValid] = useState(false);
-    
+   
     // Validate fullName
     useEffect(() => {
       const isValid = schema.fields.fullName.isValidSync(formData.fullName);
@@ -53,6 +50,8 @@ export default function Form() {
   
   const isFormValid = isFullNameValid && isSizeValid;
   
+  const [formErrors, setFormErrors] = useState({});
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -96,7 +95,7 @@ export default function Form() {
       <h2>Order Your Pizza</h2>
 
       <div className="input-group">
-        <label for="fullName">Full Name</label><br />
+        <label htmlFor="fullName">Full Name</label><br />
         <input
           name="fullName"
           placeholder="Type full name"
@@ -109,7 +108,7 @@ export default function Form() {
       </div>
 
       <div className="input-group">
-        <label for="size">Size</label><br/>
+        <label htmlFor="size">Size</label><br/>
         <select
           name="size"
           id="size"
@@ -140,6 +139,6 @@ export default function Form() {
         ))}
         {formErrors.toppings && <div className='error'>{formErrors.toppings}</div>}
       </div>
-      <button type="submit" disabled = {!isFormFilled}>Submit</button>
+      <button type="submit" disabled = {!isFormValid}>Submit</button>
     </form>
-  )}}
+  )}
