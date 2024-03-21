@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "fkill :9009 :3003 -f -s && concurrently \"npm:backend\" \"npm:frontend\"",
-    "test": "jest --watchAll --verbose",
+    "test": "jest --watchAll",
     "build": "cross-env NODE_ENV=production webpack",
     "frontend": "webpack serve --open",
     "backend": "node backend/server.js",
@@ -43,11 +43,12 @@
     "axios": "^1.5.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "formik": "^2.4.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.17.0",
+    "react-router-dom": "^6.22.3",
     "styled-components": "^6.1.0",
-    "yup": "^1.3.2"
+    "yup": "^1.4.0"
   },
   "engines": {
     "node": ">=16.x",
