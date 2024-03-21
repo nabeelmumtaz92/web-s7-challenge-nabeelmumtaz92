@@ -54,6 +54,7 @@ export default function Form() {
     // Since toppings validation is not directly tied to input, we won't validate it here
   }, [formData.fullName, formData.size]);
 
+  // handleChange function
   const handleChange = (event) => {
     const {name, value, type, checked} = event.target;
     setFormData((prev)=> {
