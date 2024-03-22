@@ -28,7 +28,7 @@ const toppingsOptions = [
   { topping_id: '4', text: 'Mushrooms' },
   { topping_id: '5', text: 'Ham' },
 ];
-
+// Form component
 export default function Form() {
   const [formData, setFormData] = useState({
     fullName: '',
