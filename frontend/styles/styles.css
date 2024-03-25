@@ -71,11 +71,16 @@ input[type=submit] {
 
 
 .success {
+  display: block; /* Ensure it's not inline */
+  width: 250px; /* Match the width of your form inputs */
+  margin: 0 auto 1rem; /* Center align and add margin below */
   background-color: rgb(224, 255, 224);
   color: rgb(0, 81, 11);
   font-size: 0.75rem;
   padding: 0.75rem;
+  border: 1px solid lightgray; /* Optional: if you want it to look more like an input box */
 }
+
 
 .failure {
   background-color: rgb(255, 201, 201);
@@ -113,3 +118,10 @@ a {
 a.active {
   color: #ff4b00;
 }
+
+.topping-label {
+  display: flex;
+  align-items: center; /* Aligns the checkbox and label text vertically */
+  margin-bottom: 0.5rem; /* Adds some space between each label */
+}
+

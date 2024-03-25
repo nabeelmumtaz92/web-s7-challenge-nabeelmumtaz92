@@ -1,152 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import * as Yup from 'yup';
-import '../styles/styles.css';
-import '../styles/reset.css';
 
-// Validation schema using Yup
-const schema = Yup.object().shape({
+import React, { useState } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import axios from 'axios';
+
+const toppingOptions = {
+  '1': 'Pepperoni',
+  '2': 'Green Peppers',
+  '3': 'Pineapple',
+  '4': 'Mushrooms',
+  '5': 'Ham',
+};
+
+const validationSchema = Yup.object({
   fullName: Yup.string()
+    .trim()
     .min(3, 'Full name must be at least 3 characters')
-    .max(20, 'Full name must be at most 20 characters')
+    .max(20, 'Full name must be 20 characters or less')
     .required('Full name is required'),
   size: Yup.string()
-    .oneOf(['S', 'M', 'L'], 'Size must be S, M, or L')
-    .required('Size is required'),
-  toppings: Yup.array()
-    .of(
-      Yup.number()
-        .min(1, 'Topping ID must be at least 1')
-        .max(5, 'Topping ID must be at most 5')
-        .integer('Topping ID must be an integer')
-    )
+    .required('Please select a size') // Custom message specifically asking to make a selection
+    .oneOf(['S', 'M', 'L'], 'Size must be S, M, or L'), // Ensures only valid options are submitted
+  toppings: Yup.array().of(Yup.string().oneOf(['1', '2', '3', '4', '5'], 'Invalid topping')),
 });
 
-const toppingsOptions = [
-  { topping_id: '1', text: 'Pepperoni' },
-  { topping_id: '2', text: 'Green Peppers' },
-  { topping_id: '3', text: 'Pineapple' },
-  { topping_id: '4', text: 'Mushrooms' },
-  { topping_id: '5', text: 'Ham' },
-];
-// Form component
 export default function Form() {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    size: '',
-    toppings: [],
+  const [orderSuccessMessage, setOrderSuccessMessage] = useState('');
+
+  const formik = useFormik({
+    initialValues: {
+      fullName: '',
+      size: '',
+      toppings: [],
+    },
+    validationSchema,
+    onSubmit: (values, { resetForm }) => {
+      axios.post('http://localhost:9009/api/order', values)
+        .then(response => {
+          const toppingsCount = values.toppings.length;
+          const sizeText = values.size === 'S' ? 'small' : values.size === 'M' ? 'medium' : 'large';
+          const toppingsText = toppingsCount === 0 ? 'no toppings' : toppingsCount === 1 ? '1 topping' : `${toppingsCount} toppings`;
+          const message = `Thank you for your order, ${values.fullName}! Your ${sizeText} pizza with ${toppingsText} is on the way.`;
+          
+          setOrderSuccessMessage(message);
+          resetForm();
+        })
+        .catch(error => {
+          alert('Order Failed!');
+          console.error('Order Failed:', error);
+        });
+    },
   });
-  const [formErrors, setFormErrors] = useState({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
 
-  useEffect(() => {
-    const validateField = async (fieldName, value) => {
-      try {
-        await Yup.reach(schema, fieldName).validate(value);
-        setFormErrors((prevErrors) => ({ ...prevErrors, [fieldName]: '' }));
-      } catch (error) {
-        setFormErrors((prevErrors) => ({ ...prevErrors, [fieldName]: error.message }));
-      }
-    };
-
-    validateField('fullName', formData.fullName);
-    validateField('size', formData.size);
-    // Since toppings validation is not directly tied to input, we won't validate it here
-  }, [formData.fullName, formData.size]);
-
-  const handleChange = (event) => {
-    const {name, value, type, checked} = event.target;
-    setFormData((prev)=> {
-      // Update state based on input type
-      const updatedFormData = type === 'checkbox' 
-      ? {
-        ...prev, 
-        toppings: checked 
-        ? [...prev.toppings, value]
-        : prev.toppings.filter((topping) => topping !== value),
-      }
-      : {
-        ...prev, [name]: value, 
-      }
-    })
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      await schema.validate(formData, { abortEarly: false });
-      const toppingsCount = formData.toppings.length;
-      let toppingsText = `${toppingsCount} ${toppingsCount === 1 ? 'topping' : 'toppings'}`;
-      if (toppingsCount === 0) {
-        toppingsText = 'no toppings';
-      }
-      const message = `Thank you for your order, ${formData.fullName}! Your ${formData.size} pizza with ${toppingsText} is on the way.`;
-      setSuccessMessage(message);
-      setIsSubmitted(true);
-      setFormErrors({});
-      // Here, you would normally proceed with further form submission steps, e.g., sending data to a server.
-    } catch (err) {
-      const errors = err.inner.reduce((acc, error) => {
-        acc[error.path] = error.message;
-        return acc;
-      }, {});
-      setFormErrors(errors);
-      setIsSubmitted(false);
+  const handleToppingChange = e => {
+    const { value, checked } = e.target;
+    const { toppings } = formik.values;
+    if (checked) {
+      formik.setFieldValue('toppings', [...toppings, value]);
+    } else {
+      formik.setFieldValue('toppings', toppings.filter(t => t !== value));
     }
   };
-
-  const isFormValid = Object.keys(formErrors).length === 0;
 
   return (
     <div>
       <h2>Order Your Pizza</h2>
-      {isSubmitted && <div className="success">{successMessage}</div>}
-      <form onSubmit={handleSubmit}>
+      {orderSuccessMessage && <div className="success">{orderSuccessMessage}</div>}
+      <form onSubmit={formik.handleSubmit} className="form">
         <div className="input-group">
-          <label htmlFor="fullName">Full Name</label><br />
+          <label htmlFor="fullName">Full Name</label>
           <input
-            name="fullName"
-            placeholder="Type full name"
             id="fullName"
+            name="fullName"
             type="text"
-            value={formData.fullName}
-            onChange={handleChange}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.fullName}
+            className={formik.touched.fullName && formik.errors.fullName ? 'input-error' : ''}
           />
-          {formErrors.fullName && <div className='error'>{formErrors.fullName}</div>}
+          {formik.touched.fullName && formik.errors.fullName && (
+            <div className="error">{formik.errors.fullName}</div>
+          )}
         </div>
 
         <div className="input-group">
-          <label htmlFor="size">Size</label><br/>
+          <label htmlFor="size">Size</label>
           <select
-            name="size"
             id="size"
-            value={formData.size}
-            onChange={handleChange}
+            name="size"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.size}
+            className={formik.touched.size && formik.errors.size ? 'input-error' : ''}
           >
-            <option value="">----Choose Size----</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
+            <option value="">Select a size</option>
+            <option value="S">Small</option>
+            <option value="M">Medium</option>
+            <option value="L">Large</option>
           </select>
-          {formErrors.size && <div className='error'>{formErrors.size}</div>}
+          {formik.touched.size && formik.errors.size && (
+            <div className="error">{formik.errors.size}</div>
+          )}
         </div>
 
         <div className="input-group">
-          {toppingsOptions.map(({ topping_id, text }) => (
-            <label key={topping_id}>
-              <input
-                name="toppings"
-                type="checkbox"
-                value={topping_id}
-                onChange={handleChange}
-                checked={formData.toppings.includes(topping_id)}
-              />
-              {text}<br />
-            </label>
-          ))}
-        </div>
-        <button type="submit" disabled={!isFormValid}>Submit</button>
+          <fieldset>
+            <legend>Toppings</legend>
+            {Object.entries(toppingOptions).map(([id, name]) => (
+              <label key={id} className="topping-label">
+                <input
+                  type="checkbox"
+                  name="toppings"
+                  value={id}
+                  onChange={handleToppingChange}
+                  checked={formik.values.toppings.includes(id)}
+                /> {name}
+
+      </label>
+    ))}
+  </fieldset>
+</div>
+
+
+        <button type="submit" disabled={!formik.isValid || formik.isSubmitting || !formik.dirty} className="submit">
+          Submit Order
+        </button>
       </form>
     </div>
-  );
-}
+  )}
